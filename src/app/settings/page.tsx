@@ -197,7 +197,8 @@ export default function SettingsPage() {
 
   // 翻译函数
   const t = (key: string) => {
-    return translations[language][key as keyof typeof translations.zh] || key
+    // 使用类型断言确保TypeScript不会报错
+    return (translations[language] as any)[key] || key;
   }
 
   // 语言切换
