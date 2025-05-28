@@ -3,10 +3,25 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 // import { getAnalytics } from "firebase/analytics"; // 如果你确实需要 Analytics
-import firebaseConfig from "./firebase-config"; // 导入外部配置文件
 
-// 注意：firebase-config.js 已添加到 .gitignore
-// 当克隆代码库时，需要基于 firebase-config-example.js 创建自己的 firebase-config.js
+// 尝试导入本地配置，如果不存在则使用环境变量
+let firebaseConfig;
+try {
+  // 本地开发环境：从firebase-config.js导入
+  const config = require("./firebase-config").default;
+  firebaseConfig = config;
+} catch (error) {
+  // Vercel部署环境：使用环境变量
+  firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  };
+}
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
