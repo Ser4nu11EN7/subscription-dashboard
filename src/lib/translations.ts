@@ -277,7 +277,7 @@ export const translations = {
     dangerZone: "Danger Zone",
     dangerDesc: "These actions cannot be undone, please proceed with caution",
     saveChanges: "Save Changes",
-    settingsSaved: "Settings Saved",
+    changesSaved: "Settings Saved",
     enabled: "Enabled",
     disabled: "Disabled",
     public: "Public",
