@@ -277,7 +277,6 @@ export function AppSidebar({ language, onLanguageChange, t }: AppSidebarProps) {
       <Dialog open={helpDialogOpen} onOpenChange={setHelpDialogOpen}>
         <DialogContent
           className="max-w-4xl max-h-[85vh] overflow-hidden p-0 backdrop-blur-2xl bg-gradient-to-br from-white/80 via-white/70 to-white/60 dark:from-gray-900/80 dark:via-gray-900/70 dark:to-gray-900/60 border border-white/40 dark:border-gray-700/40 shadow-2xl"
-          hideCloseButton={true}
         >
           {/* 装饰性背景 */}
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 dark:from-blue-400/5 dark:via-purple-400/5 dark:to-pink-400/5" />
