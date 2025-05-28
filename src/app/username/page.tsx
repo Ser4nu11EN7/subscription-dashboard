@@ -56,8 +56,10 @@ export default function LoginPage() {
   }, [])
 
   // 翻译函数
-  const t = (key: string) => {
-    return translations[language][key as keyof typeof translations.zh] || key
+  const t = (key: string): string => {
+    // 使用类型断言确保返回类型总是字符串
+    const translation = translations[language][key as keyof typeof translations.zh]
+    return typeof translation === 'string' ? translation : String(translation || key)
   }
 
   // 语言切换
@@ -564,19 +566,45 @@ export default function LoginPage() {
                       </CardHeader>
                       <CardContent>
                         <ul className="space-y-4">
-                          {Array.isArray(t("benefitsList")) &&
-                            t("benefitsList").map((benefit, index) => (
-                              <li key={index} className="flex items-start gap-3">
-                                <div
-                                  className={`mt-1 p-1 rounded-full ${
+                          {(() => {
+                            const benefitsList = t("benefitsList");
+                            // 处理可能的类型问题：确保benefitsList是数组
+                            if (typeof benefitsList === 'string') {
+                              // 如果翻译返回字符串，则展示单个元素
+                              return (
+                                <li className="flex items-start gap-3">
+                                  <div className={`mt-1 p-1 rounded-full ${
                                     isDarkMode ? "bg-blue-900/30 text-blue-400" : "bg-blue-100 text-blue-600"
-                                  }`}
-                                >
+                                  }`}>
+                                    <CheckSquare className="w-4 h-4" />
+                                  </div>
+                                  <span className={isDarkMode ? "text-gray-300" : "text-gray-700"}>{benefitsList}</span>
+                                </li>
+                              );
+                            }
+                            
+                            // 使用默认值，如果翻译不可用
+                            const defaultBenefits = [
+                              "云端同步订阅数据", 
+                              "多设备无缝访问", 
+                              "数据安全备份", 
+                              "个性化推荐"
+                            ];
+                            
+                            // 使用默认值作为fallback
+                            const benefits = Array.isArray(benefitsList) ? benefitsList : defaultBenefits;
+                            
+                            return benefits.map((benefit, index) => (
+                              <li key={index} className="flex items-start gap-3">
+                                <div className={`mt-1 p-1 rounded-full ${
+                                  isDarkMode ? "bg-blue-900/30 text-blue-400" : "bg-blue-100 text-blue-600"
+                                }`}>
                                   <CheckSquare className="w-4 h-4" />
                                 </div>
                                 <span className={isDarkMode ? "text-gray-300" : "text-gray-700"}>{benefit}</span>
                               </li>
-                            ))}
+                            ))
+                          })()}
                         </ul>
                       </CardContent>
                     </Card>
