@@ -1,0 +1,118 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 全局函数：检查用户是否已认证
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // 全局函数：检查是否是该资源的所有者
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // 全局函数：检查是否为管理员
+    function isAdmin() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    // 全局函数：安全地检查文档字段
+    function hasField(data, field, defaultValue) {
+      return data != null && data[field] != null ? data[field] : defaultValue;
+    }
+    
+    // 公开数据 - 任何人都可以读取的数据
+    match /publicData/{document=**} {
+      allow read: if true;  // 允许任何人读取
+      allow write: if isAuthenticated() && isAdmin();  // 只有管理员可以写入
+    }
+    
+    // 订阅数据 - 用户必须登录且只能操作自己的数据
+    match /subscriptions/{subscriptionId} {
+      // 读取条件：文档公开或用户是所有者或为管理员
+      allow read: if 
+        // 如果文档不存在isPublic字段或其值不为true，则默认为私有
+        (exists(resource) && hasField(resource.data, 'isPublic', false)) || 
+        (isAuthenticated() && (
+          !exists(resource) || // 允许用户检查文档是否存在
+          hasField(resource.data, 'userId', '') == request.auth.uid || 
+          isAdmin()
+        ));
+      
+      // 创建条件：必须设置userId为自己
+      allow create: if isAuthenticated() && 
+                     request.resource.data.userId == request.auth.uid;
+      
+      // 更新条件：必须是文档所有者
+      allow update: if isAuthenticated() && 
+                     exists(resource) && 
+                     resource.data.userId == request.auth.uid;
+      
+      // 删除条件：必须是文档所有者
+      allow delete: if isAuthenticated() && 
+                     exists(resource) && 
+                     resource.data.userId == request.auth.uid;
+    }
+    
+    // 用户资料 - 只有本人可以完全访问
+    match /users/{userId} {
+      // 读取条件：是本人、是管理员，或者资料设置为公开
+      allow read: if 
+        isAuthenticated() && request.auth.uid == userId ||  // 本人
+        isAdmin() ||  // 管理员
+        (exists(resource) && hasField(resource.data, 'publicProfile', false));  // 设置为公开
+      
+      // 用户可以创建自己的资料
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // 用户可以更新自己的资料
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+      
+      // 只有本人和管理员可以删除资料
+      allow delete: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // 设置数据 - 区分公开和私有
+    match /settings/{settingId} {
+      // 公开设置可以被任何人读取，私有设置只能被所有者和管理员读取
+      allow read: if 
+        (exists(resource) && hasField(resource.data, 'isPublic', false)) || 
+        (isAuthenticated() && (
+          settingId == request.auth.uid || 
+          isAdmin()
+        ));
+      
+      // 私有设置只能被所有者和管理员修改
+      allow write: if isAuthenticated() && (
+        settingId == request.auth.uid || 
+        isAdmin()
+      );
+    }
+    
+    // 应用信息 - 完全公开
+    match /appInfo/{document} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isAdmin();
+    }
+    
+    // 管理员角色
+    match /admins/{adminId} {
+      allow read: if isAuthenticated() && request.auth.uid == adminId;
+      // 只允许其他管理员添加或删除管理员
+      allow write: if isAuthenticated() && isAdmin() && request.auth.uid != adminId;
+    }
+    
+    // 如果没有管理员，允许第一个用户成为管理员（初始化时使用）
+    match /admins/{adminId} {
+      allow write: if isAuthenticated() && 
+                    request.auth.uid == adminId && 
+                    !exists(/databases/$(database)/documents/admins/__admin_initialized__);
+    }
+    
+    // 管理员初始化标记
+    match /admins/__admin_initialized__ {
+      allow read: if true;
+      allow write: if isAuthenticated() && isAdmin();
+    }
+  }
+} 
