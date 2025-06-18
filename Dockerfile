@@ -62,7 +62,7 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-ENV PORT=3000 # Next.js server listens on PORT env var by default
+ENV PORT=3000 
 
 # The standalone output includes a server.js file to start the application
 CMD ["node", "server.js"]
