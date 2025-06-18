@@ -39,7 +39,7 @@ ENV NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=$NEXT_PUBLIC_FIREBASE_MESSAGING_SEN
 ENV NEXT_PUBLIC_FIREBASE_APP_ID=$NEXT_PUBLIC_FIREBASE_APP_ID
 ENV NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=$NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 
-ENV NEXT_TELEMETRY_DISABLED 1 # Disable Next.js telemetry during build
+ENV NEXT_TELEMETRY_DISABLED=1 # Disable Next.js telemetry during build
 
 RUN npm run build # Or yarn build / pnpm build
 
@@ -48,7 +48,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED 1 # Also disable telemetry in the running container
+ENV NEXT_TELEMETRY_DISABLED=1 # Also disable telemetry in the running container
 
 # Optional: Create a non-root user for security
 # RUN addgroup -S --gid 1001 nodejs
@@ -62,7 +62,7 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-ENV PORT 3000 # Next.js server listens on PORT env var by default
+ENV PORT=3000 # Next.js server listens on PORT env var by default
 
 # The standalone output includes a server.js file to start the application
 CMD ["node", "server.js"]
