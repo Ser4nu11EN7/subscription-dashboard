@@ -48,7 +48,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1 # Also disable telemetry in the running container
+ENV NEXT_TELEMETRY_DISABLED=1 
 
 # Optional: Create a non-root user for security
 # RUN addgroup -S --gid 1001 nodejs
