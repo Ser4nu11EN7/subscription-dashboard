@@ -1,17 +1,9 @@
+// src/app/layout.tsx
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from 'geist/font/sans'; // 直接导入初始化好的字体对象
+import { GeistMono } from 'geist/font/mono';  // 直接导入初始化好的字体对象
 import "./globals.css";
 import { AppProvider } from "@/lib/store";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "订阅管理仪表盘",
@@ -24,10 +16,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    // 直接使用导入的 GeistSans 和 GeistMono 对象的 .variable 属性
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className="antialiased">
         <AppProvider>
           {children}
         </AppProvider>
